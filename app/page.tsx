@@ -1,69 +1,57 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+
+import { useState, type FormEvent } from "react";
+
+type Task = { id: string; text: string };
 
 export default function Home() {
+  const [text, setText] = useState("");
+  const [tasks, setTasks] = useState<Task[]>([]);
+
+  function addTask(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const newText = text.trim();
+    if (!newText) return;
+
+    setTasks((current) => [
+      ...current,
+      { id: crypto.randomUUID(), text: newText },
+    ]);
+    setText("");
+  }
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main>
+      <h1>Att göra-lista</h1>
+
+      <form onSubmit={addTask}>
+        <label htmlFor="task-input">Ny uppgift</label>
+        <input
+          id="task-input"
+          value={text}
+          onChange={(event) => setText(event.target.value)}
         />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.tsx</code> file.
-          </h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
+        <button type="submit">Lägg till</button>
+      </form>
+
+      {tasks.length === 0 && <p>Inga uppgifter än</p>}
+      <ul>
+        {tasks.map((task) => (
+          <li key={task.id}>
+            <span>{task.text}</span>
+            <button
+              type="button"
+              onClick={() =>
+                setTasks((current) =>
+                  current.filter((item) => item.id !== task.id),
+                )
+              }
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+              Ta bort
+            </button>
+          </li>
+        ))}
+      </ul>
+    </main>
   );
 }
